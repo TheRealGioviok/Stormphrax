@@ -641,7 +641,7 @@ namespace stormphrax::search
 				m_ttable.put(pos.key(), ScoreNone, rawStaticEval, NullMove, 0, 0, TtFlag::None, ttpv);
 
 			curr.staticEval = inCheck ? ScoreNone
-				: eval::adjustEval(pos, thread.contMoves, ply, &thread.correctionHistory, rawStaticEval);
+				: eval::adjustEval(pos, thread.contMoves, ply, ttMoveNoisy ? nullptr : &thread.correctionHistory, rawStaticEval);
 		}
 
 		const bool improving = [&]
@@ -1068,7 +1068,8 @@ namespace stormphrax::search
 				|| ttEntry.flag == TtFlag::UpperBound && ttEntry.score <= alpha
 				|| ttEntry.flag == TtFlag::LowerBound && ttEntry.score >= beta))
 			return ttEntry.score;
-
+		
+		const bool ttMoveNoisy = ttEntry.move && pos.isNoisy(ttEntry.move);
 		const bool ttpv = PvNode || ttEntry.wasPv;
 
 		Score rawStaticEval, eval;
@@ -1088,7 +1089,7 @@ namespace stormphrax::search
 				m_ttable.put(pos.key(), ScoreNone, rawStaticEval, NullMove, 0, 0, TtFlag::None, ttpv);
 
 			const auto staticEval = eval::adjustEval(pos, thread.contMoves,
-				ply, &thread.correctionHistory, rawStaticEval);
+				ply, ttMoveNoisy ? nullptr : &thread.correctionHistory, rawStaticEval);
 
 			if (ttEntry.flag == TtFlag::Exact
 				|| ttEntry.flag == TtFlag::UpperBound && ttEntry.score < staticEval

@@ -38,7 +38,7 @@ namespace stormphrax::eval
 	{
 		eval = eval * (200 - pos.halfmove()) / 200;
 
-		if constexpr (Correct)
+		if (Correct && correction)
 			eval = correction->correct(pos, moves, ply, eval);
 
 		return std::clamp(eval, -ScoreWin + 1, ScoreWin - 1);
